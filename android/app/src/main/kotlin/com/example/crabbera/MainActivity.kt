@@ -1,4 +1,4 @@
-package com.example.crabera
+package com.example.crabbera
 
 import io.flutter.embedding.android.FlutterActivity
 
