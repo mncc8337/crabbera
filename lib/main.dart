@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 
-import 'globals.dart' as globals;
+import 'package:Crabbera/globals.dart' as globals;
 
-import 'errorpage.dart';
-import 'imagescreen.dart';
+import 'package:Crabbera/mainpage.dart';
+import 'package:Crabbera/errorpage.dart';
 
-Future<void> main() async {
-    runApp(Crabbera(initFailed: await initCameras()));
+void main() {
+    runApp(const Crabbera());
 }
 
 class Crabbera extends StatelessWidget {
-    const Crabbera({super.key, required this.initFailed});
-
-    final bool initFailed;
+    const Crabbera({super.key});
 
     @override
     Widget build(BuildContext context) {
-        late Widget homeApp;
-        if(initFailed) {
-            homeApp = ErrorPage(error: "no camera!");
-            }
+        late Widget displayPage;
+        if(!Platform.isAndroid) {
+            displayPage = ErrorPage(error: "platform is not supported");
+        }
         else {
-            homeApp = ImageScreen(cameraId: 0);
+            displayPage = MainPage();
         }
 
         return MaterialApp(
@@ -30,7 +29,7 @@ class Crabbera extends StatelessWidget {
                 colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
                 useMaterial3: true,
             ),
-            home: homeApp,
+            home: displayPage,
         );
     }
 }
