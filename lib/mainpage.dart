@@ -20,8 +20,9 @@ class MainPageState extends State<MainPage> {
     void updateCameraInfo() async {
         isoRange = await cameraController.getISO();
         cameraIdList = await cameraController.getCameraIdList();
-        print(cameraIdList);
+        debugPrint(cameraIdList.toString());
         setState(() {});
+        debugPrint('info updated');
     }
 
     @override
