@@ -29,7 +29,10 @@ class MainActivity : FlutterActivity() {
                 "setCamera" -> {
                     val id = call.argument<String>("id")
                     if(id == null) result.error("INVALID_ARGUMENT", "Camera ID is required", null)
-                    else result.success(setCamera(id))
+                    else {
+                        setCamera(id)
+                        result.success(null)
+                    }
                 }
 
                 else -> result.notImplemented()
