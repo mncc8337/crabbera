@@ -12,22 +12,27 @@ class MainActivity : FlutterActivity() {
 
     private lateinit var cameraManager: CameraManager
 
-    private lateinit var currentCameraId: String
+    private lateinit var camera: CameraCharacteristics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
-        currentCameraId = cameraManager.cameraIdList[0]
+        setCamera(cameraManager.cameraIdList[0])
 
-        MethodChannel(flutterEngine!!.dartExecutor, CHANNEL).setMethodCallHandler { call, result ->
-            if(call.method == "getCameraIdList") {
-                result.success(getCameraIdList())
-            }
-            else if(call.method == "getISO") {
-                result.success(getISO())
-            } else {
-                result.notImplemented()
+        MethodChannel(flutterEngine!!.dartExecutor, CHANNEL).setMethodCallHandler{call, result ->
+            when(call.method) {
+                "getCameraIdList"    -> result.success(getCameraIdList())
+                "getISO"             -> result.success(getISO())
+                "getFocalLengthList" -> result.success(getFocalLengthList())
+
+                "setCamera" -> {
+                    val id = call.argument<String>("id")
+                    if(id == null) result.error("INVALID_ARGUMENT", "Camera ID is required", null)
+                    else result.success(setCamera(id))
+                }
+
+                else -> result.notImplemented()
             }
         }
     }
@@ -36,23 +41,35 @@ class MainActivity : FlutterActivity() {
         return cameraManager.cameraIdList.toList()
     }
 
-    private fun setCurrentCamera(id: String) {
-        currentCameraId = id
+    private fun setCamera(id: String) {
+        camera = cameraManager.getCameraCharacteristics(id)
     }
 
     private fun getISO(): List<Int> {
         try {
-            val characteristics = cameraManager.getCameraCharacteristics(currentCameraId)
-            val isoRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
+            val isoRange = camera.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
            
             if(isoRange != null) {
                 return listOf(isoRange.lower,  isoRange.upper);
             } else {
-                return emptyList();
+                return emptyList()
             }
         } catch(e: Exception) {
-            e.printStackTrace()
-            return emptyList();
+            return emptyList()
+        }
+    }
+
+    private fun getFocalLengthList(): List<Float> {
+        try {
+            val focalLengthList = camera.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+           
+            if(focalLengthList != null) {
+                return focalLengthList.toList();
+            } else {
+                return emptyList()
+            }
+        } catch(e: Exception) {
+            return emptyList()
         }
     }
 }

@@ -14,21 +14,40 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
     final Camera2APIController cameraController = Camera2APIController();
 
-    List<int> isoRange = [0, 0];
     List<String> cameraIdList = [];
+    int cameraIdListIndex = 0;
+
+    List<int> isoRange = [0, 0];
+    List<double> focalLengthList = [];
 
     void updateCameraInfo() async {
         isoRange = await cameraController.getISO();
-        cameraIdList = await cameraController.getCameraIdList();
-        debugPrint(cameraIdList.toString());
+        focalLengthList = await cameraController.getFocalLengthList();
         setState(() {});
         debugPrint('info updated');
+    }
+
+    void switchCamera() {
+        if(cameraIdList.isEmpty) return;
+
+        cameraIdListIndex++;
+        if(cameraIdListIndex >= cameraIdList.length) {
+            cameraIdListIndex = 0;
+        }
+        
+        cameraController.setCamera(cameraIdList[cameraIdListIndex]).then((error) {
+            if(error) debugPrint('error while switching camers');
+            updateCameraInfo();
+        });
+
+        debugPrint('current camera: $cameraIdListIndex');
     }
 
     @override
     void initState() {
         super.initState();
 
+        cameraController.getCameraIdList().then((val) {cameraIdList = val;});
         updateCameraInfo();
     }
 
@@ -42,11 +61,13 @@ class MainPageState extends State<MainPage> {
             body: Center(
                 child: Column(
                     children: [
+                        Text('current camera: $cameraIdListIndex'),
                         Text("iso range: ${isoRange[0]} - ${isoRange[1]}"),
+                        Text("available focal lengths: ${focalLengthList.toString()}"),
                     ],
                 ),
             ),
-            floatingActionButton: FloatingActionButton(onPressed: updateCameraInfo),
+            floatingActionButton: FloatingActionButton(onPressed: switchCamera),
         );
     }
 }

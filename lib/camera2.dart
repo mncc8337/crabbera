@@ -3,6 +3,16 @@ import 'package:flutter/services.dart';
 class Camera2APIController {
     static const channel = MethodChannel('com.example.camera/settings');
 
+    Future<List<String>> getCameraIdList() async {
+        late final dynamic list;
+        try {
+            list = await channel.invokeMethod('getCameraIdList');
+        } on PlatformException {
+            list = [];
+        }
+        return list.cast<String>();
+    }
+
     Future<List<int>> getISO() async {
         late final dynamic iso;
         try {
@@ -13,13 +23,25 @@ class Camera2APIController {
         return iso.cast<int>();
     }
 
-    Future<List<String>> getCameraIdList() async {
-        late final dynamic list;
+    Future<List<double>> getFocalLengthList() async {
+        late final dynamic focalLengths;
         try {
-            list = await channel.invokeMethod('getCameraIdList');
+            focalLengths = await channel.invokeMethod('getFocalLengthList');
         } on PlatformException {
-            list = [];
+            focalLengths = [];
         }
-        return list.cast<String>();
+
+        return focalLengths.cast<double>();
+    }
+
+    Future<bool> setCamera(String id) async {
+        late final bool error;
+        try {
+            await channel.invokeMethod('setCamera', {'id': id});
+            error = false;
+        } on PlatformException {
+            error = true;
+        }
+        return error;
     }
 }
