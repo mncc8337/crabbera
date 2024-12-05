@@ -1,7 +1,8 @@
 import 'package:flutter/services.dart';
 
-class Camera2APIController {
-    static const channel = MethodChannel('com.example.camera/settings');
+class Camera2Controller {
+    static const channel = MethodChannel('com.mncc8337.camera');
+    Uint8List? imageBytes;
 
     Future<List<String>> getCameraIdList() async {
         late final dynamic list;
@@ -43,5 +44,14 @@ class Camera2APIController {
             error = true;
         }
         return error;
+    }
+
+    Future<bool> openAndCapture() async {
+        try {
+            imageBytes = await channel.invokeMethod('openAndCapture');
+            return false;
+        } on PlatformException {
+            return true;
+        }
     }
 }
